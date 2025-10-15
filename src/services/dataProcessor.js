@@ -14,7 +14,7 @@ const validate = (record) => {
     return false;
   }
 
-  if (!record.sensorData) {
+  if (!record.sensorData || record.sensorData.length === 0) {
     logger.warn('Missing sensorData');
     return false;
   }
