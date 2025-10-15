@@ -1,0 +1,15 @@
+{
+  "app": {
+    "name": "EMSD GWIN Import from Waterland",
+    "version": "1.0.0"
+  },
+  "api": {
+    "sourceUrl": "",
+    "targetUrl": "",
+    "timeout": 30000,
+    "retryAttempts": 3
+  },
+  "logging": {
+    "level": "info"
+  }
+}

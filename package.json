@@ -1,0 +1,40 @@
+{
+  "name": "emsd-gwin-import-from-waterland",
+  "version": "1.0.0",
+  "description": "EMSD GWIN Import from Waterland - Data Import Handler",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "babel-node src/index.js",
+    "start:prod": "node dist/index.js",
+    "build": "npm run clean && npm run transpile && npm run copy-files",
+    "clean": "rm -rf dist",
+    "transpile": "babel src --out-dir dist --copy-files",
+    "copy-files": "cp .env dist/ 2>/dev/null || : && cp -r config dist/ 2>/dev/null || :",
+    "lint": "eslint src/"
+  },
+  "keywords": [
+    "emsd",
+    "gwin",
+    "data-import",
+    "waterland"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.0",
+    "@babel/node": "^7.22.0",
+    "@babel/preset-env": "^7.23.0",
+    "eslint": "^8.50.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.28.0",
+    "eslint-plugin-n": "^16.0.0",
+    "eslint-plugin-promise": "^6.1.0"
+  }
+}
