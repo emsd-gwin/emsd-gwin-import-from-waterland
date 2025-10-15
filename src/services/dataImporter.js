@@ -48,7 +48,11 @@ const createDataImporter = (ingressUrl, username, password) => {
         return { success: true, recordCount: 0 };
       }
 
-      const response = await importWithRetry(data);
+      const sensorInfoList = {
+        sensorInfo: data
+      };
+
+      const response = await importWithRetry(sensorInfoList);
 
       logger.info('Data import completed successfully', {
         recordCount: data.length,
