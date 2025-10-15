@@ -29,7 +29,7 @@ const createDataFetcher = (baseUrl, apiAccessToken) => {
       const response = await axios.get(url, { timeout });
 
       return {
-        ...response.data,
+        sensorData: response.data,
         siteInfo
       };
     } catch (error) {

@@ -9,18 +9,28 @@ const stringToFloat = (value) => {
 };
 
 const validate = (record) => {
-  if (!record.device_name) {
-    logger.debug('Missing device_name');
+  if (!record.siteInfo) {
+    logger.warn('Missing siteData');
     return false;
   }
 
-  if (!record.timestamp) {
-    logger.debug('Missing timestamp');
+  if (!record.sensorData) {
+    logger.warn('Missing sensorData');
     return false;
   }
 
-  if (!record.project_site_id) {
-    logger.debug('Missing project_site_id');
+  if (!record.siteInfo.project_site_id) {
+    logger.warn(`${record.siteInfo.site_name} Missing project_site_id`);
+    return false;
+  }
+
+  if (!record.sensorData.device_name) {
+    logger.warn(`${record.siteInfo.site_name} Missing device_name`);
+    return false;
+  }
+
+  if (!record.sensorData.timestamp) {
+    logger.warn(`${record.siteInfo.site_name} Missing timestamp`);
     return false;
   }
 
@@ -52,21 +62,19 @@ const transform = (record) => {
     },
     objectJSON: JSON.stringify({
       waterLevel,
-      batteryVoltage: stringToFloat(record.voltage),
+      batteryVoltage: stringToFloat(record.sensorData.voltage),
       version: 2,
-      rainGaugeDrop: stringToFloat(record.hko_rain_data),
+      rainGaugeDrop: stringToFloat(record.sensorData.hko_rain_data),
       flowmeterLevel: 0,
       flowmeterFlow: 0,
       flowmeterVelocity: 0,
       pressure: 0,
       tide: 0,
-      ac: record.voltage ? Math.floor(stringToFloat(record.voltage) / 100) : 0,
-      rssi: stringToFloat(record.signal_value),
+      ac: record.sensorData.voltage ? Math.floor(stringToFloat(record.sensorData.voltage) / 100) : 0,
+      rssi: stringToFloat(record.sensorData.signal_value),
       ultrasonic: waterLevel,
       moisture: 0,
-      timestamp: record.timestamp,
-      deviceType: record.device_type,
-      projectSiteId: record.project_site_id
+      timestamp: record.sensorData.timestamp,
     })
   };
 
