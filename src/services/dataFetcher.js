@@ -1,21 +1,23 @@
-import axios from 'axios';
 import logger from '../utils/logger.js';
 
 const createDataFetcher = (baseUrl, apiAccessToken) => {
-  const timeout = 30000;
-
   const getTokenData = async () => {
     try {
       const url = `${baseUrl}/api/${apiAccessToken}`;
       logger.debug('Fetching token data', { url });
 
-      const response = await axios.get(url, { timeout });
-      return response.data;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
     } catch (error) {
       logger.error('Error fetching token data', {
         error: error.message,
-        status: error.response?.status,
-        statusText: error.response?.statusText
+        status: error.status
       });
       throw error;
     }
@@ -26,23 +28,29 @@ const createDataFetcher = (baseUrl, apiAccessToken) => {
       const url = `${baseUrl}/api/${apiAccessToken}/${siteName}/data/latest`;
       logger.debug('Fetching sensor data', { siteName, url });
 
-      const response = await axios.get(url, { timeout });
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
 
       return {
-        sensorData: response.data,
+        sensorData: data,
         siteInfo
       };
     } catch (error) {
       logger.error('Error fetching sensor data for site', {
         siteName,
         error: error.message,
-        status: error.response?.status
+        status: error.status
       });
       return null;
     }
   };
 
-  const fetch = async () => {
+  const fetchData = async () => {
     try {
       logger.info('Fetching data from WaterLand API', { baseUrl });
 
@@ -81,7 +89,7 @@ const createDataFetcher = (baseUrl, apiAccessToken) => {
     }
   };
 
-  return { fetch };
+  return { fetch: fetchData };
 };
 
 export default createDataFetcher;

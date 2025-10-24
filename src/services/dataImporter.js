@@ -1,4 +1,3 @@
-import axios from 'axios';
 import logger from '../utils/logger.js';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -9,18 +8,34 @@ const createDataImporter = (ingressUrl, username, password) => {
 
   const importWithRetry = async (data, attempt = 1) => {
     try {
-      const response = await axios.post(ingressUrl, data, {
-        auth: {
-          username,
-          password
-        },
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const authHeader = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+
+      const response = await fetch(ingressUrl, {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
         },
-        timeout
+        body: JSON.stringify(data),
+        signal: controller.signal
       });
 
-      return response;
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+
+      return {
+        data: responseData,
+        status: response.status,
+        statusText: response.statusText
+      };
     } catch (error) {
       if (attempt < retryAttempts) {
         logger.warn(`Import attempt ${attempt} failed, retrying...`, {
