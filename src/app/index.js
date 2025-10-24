@@ -9,6 +9,7 @@ const runImportCycle = async () => {
   const dashboardIngressUrl = process.env.DASHBOARD_INGRESS_URL || '';
   const dashboardIngressUsername = process.env.DASHBOARD_INGRESS_USERNAME || '';
   const dashboardIngressPassword = process.env.DASHBOARD_INGRESS_PASSWORD || '';
+  const proxyUrl = process.env.HTTP_PROXY || '';
 
   logger.info('Starting EMSD GWIN Import from Waterland...');
   logger.info('Data Import Handler initialized', {
@@ -22,12 +23,25 @@ const runImportCycle = async () => {
   try {
     logger.info('Starting import cycle');
 
-    // Initialize services
-    const dataFetcher = createDataFetcher(waterlandApiBaseUrl, waterlandApiAccessToken);
+    // Initialize services with optional proxy support
+    const fetcherOptions = {};
+    const importerOptions = {};
+
+    if (proxyUrl) {
+      fetcherOptions.proxy = proxyUrl;
+      importerOptions.proxy = proxyUrl;
+    }
+
+    const dataFetcher = createDataFetcher(
+      waterlandApiBaseUrl,
+      waterlandApiAccessToken,
+      fetcherOptions
+    );
     const dataImporter = createDataImporter(
       dashboardIngressUrl,
       dashboardIngressUsername,
-      dashboardIngressPassword
+      dashboardIngressPassword,
+      importerOptions
     );
 
     // Fetch data from WaterLand API

@@ -1,12 +1,36 @@
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import logger from '../utils/logger.js';
 
-const createDataFetcher = (baseUrl, apiAccessToken) => {
+const createDataFetcher = (baseUrl, apiAccessToken, options = {}) => {
+  const timeout = options.timeout || 30000;
+  const proxyUrl = options.proxy;
+
+  // Create proxy agent if proxy URL is provided
+  const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+
+  if (proxyUrl) {
+    logger.info('Using proxy for requests', { proxy: proxyUrl });
+  }
+
   const getTokenData = async () => {
     try {
       const url = `${baseUrl}/api/${apiAccessToken}`;
       logger.debug('Fetching token data', { url });
 
-      const response = await fetch(url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const fetchOptions = {
+        signal: controller.signal
+      };
+
+      if (agent) {
+        fetchOptions.agent = agent;
+      }
+
+      const response = await fetch(url, fetchOptions);
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -28,7 +52,20 @@ const createDataFetcher = (baseUrl, apiAccessToken) => {
       const url = `${baseUrl}/api/${apiAccessToken}/${siteName}/data/latest`;
       logger.debug('Fetching sensor data', { siteName, url });
 
-      const response = await fetch(url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const fetchOptions = {
+        signal: controller.signal
+      };
+
+      if (agent) {
+        fetchOptions.agent = agent;
+      }
+
+      const response = await fetch(url, fetchOptions);
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

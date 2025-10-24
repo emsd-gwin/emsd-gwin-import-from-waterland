@@ -1,10 +1,19 @@
+import { HttpsProxyAgent } from 'https-proxy-agent';
 import logger from '../utils/logger.js';
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-const createDataImporter = (ingressUrl, username, password) => {
-  const retryAttempts = 3;
-  const timeout = 30000;
+const createDataImporter = (ingressUrl, username, password, options = {}) => {
+  const retryAttempts = options.retryAttempts || 3;
+  const timeout = options.timeout || 30000;
+  const proxyUrl = options.proxy;
+
+  // Create proxy agent if proxy URL is provided
+  const agent = proxyUrl ? new HttpsProxyAgent(proxyUrl) : undefined;
+
+  if (proxyUrl) {
+    logger.info('Using proxy for requests', { proxy: proxyUrl });
+  }
 
   const importWithRetry = async (data, attempt = 1) => {
     try {
@@ -13,7 +22,7 @@ const createDataImporter = (ingressUrl, username, password) => {
 
       const authHeader = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
 
-      const response = await fetch(ingressUrl, {
+      const fetchOptions = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -21,7 +30,13 @@ const createDataImporter = (ingressUrl, username, password) => {
         },
         body: JSON.stringify(data),
         signal: controller.signal
-      });
+      };
+
+      if (agent) {
+        fetchOptions.agent = agent;
+      }
+
+      const response = await fetch(ingressUrl, fetchOptions);
 
       clearTimeout(timeoutId);
 
