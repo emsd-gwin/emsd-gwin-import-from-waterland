@@ -38,9 +38,7 @@ const validate = (record) => {
 };
 
 const transform = (record) => {
-  // StationId will be extracted from site_name, getting the string before the first space
-  // "RK005 (Lin Shing Road 2)" -> "RK005"
-  const stationID = (record.siteInfo?.site_name || '').split(' ')[0];
+  const stationID = record.device_name || record.project_site_id;
   const siteName = record.siteInfo?.site_name || stationID;
 
   const waterLevel = record.water_depth !== null && record.water_depth !== undefined
@@ -49,7 +47,7 @@ const transform = (record) => {
 
   const transformed = {
     stationID,
-    deviceName: siteName,
+    deviceName: stationID,
     devEUI: stationID,
     tags: {
       StationID: stationID,
@@ -62,7 +60,6 @@ const transform = (record) => {
       Location: siteName,
       isCameraOnly: false
     },
-    publishedAt: record.sensorData.timestamp,
     objectJSON: JSON.stringify({
       waterLevel,
       batteryVoltage: stringToFloat(record.sensorData.voltage),
