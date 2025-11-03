@@ -47,6 +47,9 @@ const transform = (record) => {
     ? stringToFloat(record.water_depth)
     : stringToFloat(record.water_level);
 
+  const timestamp = new Date(record.sensorData.timestamp);
+  // Adjust to Hong Kong Time (UTC+8)
+  timestamp.setHours(timestamp.getHours() - 8);
   const transformed = {
     stationID,
     deviceName: siteName,
@@ -62,7 +65,7 @@ const transform = (record) => {
       Location: siteName,
       isCameraOnly: false
     },
-    publishedAt: record.sensorData.timestamp,
+    publishedAt: timestamp.toISOString(),
     objectJSON: JSON.stringify({
       waterLevel,
       batteryVoltage: stringToFloat(record.sensorData.voltage),
@@ -77,7 +80,7 @@ const transform = (record) => {
       rssi: stringToFloat(record.sensorData.signal_value),
       ultrasonic: waterLevel,
       moisture: 0,
-      timestamp: record.sensorData.timestamp,
+      timestamp: timestamp.toISOString(),
     })
   };
 
