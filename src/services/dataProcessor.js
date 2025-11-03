@@ -49,7 +49,6 @@ const transform = (record) => {
 
   const timestamp = new Date(record.sensorData.timestamp);
   // Adjust to Hong Kong Time (UTC+8)
-  timestamp.setHours(timestamp.getHours() - 8);
   const transformed = {
     stationID,
     deviceName: siteName,
